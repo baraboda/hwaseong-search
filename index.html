@@ -3,294 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>화성시의회 현황카드 검색</title>
+    <title>화성시 현황카드 검색</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@8/themes/satellite-min.css">
+    <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
             padding: 20px;
+            background-color: #f5f5f5;
         }
-        
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-        
         h1 {
-            color: white;
+            color: #333;
             text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5em;
         }
-        
-        .stats {
-            text-align: center;
-            color: white;
+        .ais-SearchBox {
             margin-bottom: 30px;
-            opacity: 0.9;
         }
-        
-        .search-box {
-            width: 100%;
+        .ais-SearchBox-input {
+            padding: 12px;
+            font-size: 16px;
+        }
+        .ais-Hits-item {
+            background: white;
             padding: 20px;
-            font-size: 18px;
-            border: none;
-            border-radius: 50px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
-        .filters {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .filter-btn {
-            padding: 10px 20px;
-            background: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-        }
-        
-        .filter-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        }
-        
-        .filter-btn.active {
-            background: #ffd700;
-        }
-        
-        .results {
-            display: grid;
-            gap: 20px;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-        
         .card-header {
             display: flex;
             justify-content: space-between;
-            align-items: start;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
         }
-        
-        .card h3 {
-            color: #333;
-            font-size: 1.3em;
-            flex: 1;
-        }
-        
         .card-number {
-            background: #667eea;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.9em;
+            font-weight: bold;
+            color: #0066cc;
         }
-        
-        .badges {
-            display: flex;
-            gap: 8px;
-            margin: 10px 0;
-            flex-wrap: wrap;
+        .card-category {
+            background: #e3f2fd;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #1976d2;
         }
-        
-        .badge {
-            padding: 5px 12px;
-            background: #f0f0f0;
-            border-radius: 15px;
-            font-size: 0.85em;
-        }
-        
-        .badge.category { background: #e3f2fd; color: #1976d2; }
-        .badge.location { background: #f3e5f5; color: #7b1fa2; }
-        
         .card-content {
-            margin-top: 15px;
-        }
-        
-        .card-content h4 {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 15px;
-            margin-bottom: 5px;
-        }
-        
-        .card-content p {
-            color: #333;
             line-height: 1.6;
         }
-        
-        .loading {
-            text-align: center;
-            color: white;
-            font-size: 1.2em;
-            margin-top: 50px;
+        .card-content p {
+            margin: 8px 0;
         }
-        
+        .label {
+            font-weight: bold;
+            color: #666;
+        }
+        .ais-Stats {
+            text-align: right;
+            margin-bottom: 20px;
+            color: #666;
+        }
         .no-results {
             text-align: center;
-            color: white;
-            font-size: 1.2em;
-            margin-top: 50px;
+            padding: 40px;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏛️ 화성시의회 현황카드</h1>
-        <div class="stats" id="stats">데이터 로딩 중...</div>
+        <h1>🏛️ 화성시 현황카드 검색 시스템</h1>
         
-        <input type="text" 
-               class="search-box" 
-               id="searchInput" 
-               placeholder="검색어를 입력하세요... (예: 교통, 환경, 동탄)">
-        
-        <div class="filters">
-            <button class="filter-btn active" data-filter="all">전체</button>
-            <button class="filter-btn" data-filter="교통">교통</button>
-            <button class="filter-btn" data-filter="환경">환경</button>
-            <button class="filter-btn" data-filter="교육">교육</button>
-            <button class="filter-btn" data-filter="복지">복지</button>
-            <button class="filter-btn" data-filter="안전">안전</button>
-            <button class="filter-btn" data-filter="주거">주거</button>
-        </div>
-        
-        <div id="results" class="results">
-            <div class="loading">데이터를 불러오는 중...</div>
-        </div>
+        <div id="searchbox"></div>
+        <div id="stats"></div>
+        <div id="hits"></div>
+        <div id="pagination"></div>
     </div>
 
     <script>
-    let allData = [];
-    let currentFilter = 'all';
+        const searchClient = algoliasearch(
+            'X02D3JQ3LS',
+            '66df50144b6ff51f5e49324905c350ae'
+        );
 
-    // 데이터 로드
-    async function loadData() {
-        try {
-            const response = await fetch('data.json');
-            allData = await response.json();
-            
-            const statsResponse = await fetch('stats.json');
-            const stats = await statsResponse.json();
-            
-            document.getElementById('stats').innerHTML = 
-                `총 ${stats.totalRecords}개 카드 | 최종 업데이트: ${stats.updateTime}`;
-            
-            displayCards(allData);
-        } catch (error) {
-            console.error('Error:', error);
-            document.getElementById('results').innerHTML = 
-                '<div class="no-results">데이터 로드 실패</div>';
-        }
-    }
-
-    // 카드 표시
-    function displayCards(cards) {
-        if (cards.length === 0) {
-            document.getElementById('results').innerHTML = 
-                '<div class="no-results">검색 결과가 없습니다</div>';
-            return;
-        }
-
-        const html = cards.slice(0, 50).map(card => `
-            <div class="card">
-                <div class="card-header">
-                    <h3>${card.현안제목 || '제목 없음'}</h3>
-                    <span class="card-number">#${card.카드번호}</span>
-                </div>
-                
-                <div class="badges">
-                    ${card.분류 ? `<span class="badge category">${card.분류}</span>` : ''}
-                    ${card.지역 ? `<span class="badge location">${card.지역}</span>` : ''}
-                </div>
-                
-                <div class="card-content">
-                    ${card.문제점 ? `
-                        <h4>🔍 문제점</h4>
-                        <p>${card.문제점}</p>
-                    ` : ''}
-                    
-                    ${card.제안내용 ? `
-                        <h4>💡 제안내용</h4>
-                        <p>${card.제안내용}</p>
-                    ` : ''}
-                    
-                    ${card.답변사항 ? `
-                        <h4>📢 답변사항</h4>
-                        <p>${card.답변사항}</p>
-                    ` : ''}
-                </div>
-            </div>
-        `).join('');
-
-        document.getElementById('results').innerHTML = html;
-    }
-
-    // 검색 기능
-    function search(query) {
-        let filtered = allData;
-        
-        // 카테고리 필터
-        if (currentFilter !== 'all') {
-            filtered = filtered.filter(card => card.분류 === currentFilter);
-        }
-        
-        // 텍스트 검색
-        if (query) {
-            const q = query.toLowerCase();
-            filtered = filtered.filter(card => 
-                (card.현안제목 && card.현안제목.toLowerCase().includes(q)) ||
-                (card.문제점 && card.문제점.toLowerCase().includes(q)) ||
-                (card.제안내용 && card.제안내용.toLowerCase().includes(q)) ||
-                (card.지역 && card.지역.toLowerCase().includes(q))
-            );
-        }
-        
-        displayCards(filtered);
-    }
-
-    // 이벤트 리스너
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        search(e.target.value);
-    });
-
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentFilter = btn.dataset.filter;
-            search(document.getElementById('searchInput').value);
+        const search = instantsearch({
+            indexName: 'hwaseong',  // 새로 만든 인덱스
+            searchClient,
         });
-    });
 
-    // 초기 로드
-    loadData();
+        search.addWidgets([
+            instantsearch.widgets.searchBox({
+                container: '#searchbox',
+                placeholder: '검색어 입력 (예: 김상균, 동탄, 복지, 도로)',
+                cssClasses: {
+                    input: 'form-control',
+                }
+            }),
+            
+            instantsearch.widgets.stats({
+                container: '#stats',
+                templates: {
+                    text: `
+                        {{#hasNoResults}}검색 결과가 없습니다{{/hasNoResults}}
+                        {{#hasOneResult}}1개 항목 발견{{/hasOneResult}}
+                        {{#hasManyResults}}총 {{#helpers.formatNumber}}{{nbHits}}{{/helpers.formatNumber}}개 항목 발견 ({{processingTimeMS}}ms){{/hasManyResults}}
+                    `,
+                },
+            }),
+            
+            instantsearch.widgets.hits({
+                container: '#hits',
+                templates: {
+                    item(hit) {
+                        // 데이터 필드 안전하게 가져오기
+                        const cardNumber = hit.카드번호 || hit['카드번호'] || '-';
+                        const category = hit.분류 || hit['분류'] || '-';
+                        const region = hit.지역 || hit['지역'] || '-';
+                        const title = hit.현안제목 || hit['현안제목'] || '-';
+                        const problem = hit.문제점 || hit['문제점'] || '-';
+                        const suggestion = hit.제안내용 || hit['제안내용'] || '-';
+                        const department = hit.담당부서 || hit['담당부서'] || '-';
+                        
+                        return `
+                            <div class="card-header">
+                                <span class="card-number">${cardNumber}</span>
+                                <span class="card-category">${category}</span>
+                            </div>
+                            <div class="card-content">
+                                <p><span class="label">지역:</span> ${region}</p>
+                                <p><span class="label">현안제목:</span> ${title}</p>
+                                <p><span class="label">문제점:</span> ${problem}</p>
+                                <p><span class="label">제안내용:</span> ${suggestion}</p>
+                                <p><span class="label">담당부서:</span> ${department}</p>
+                            </div>
+                        `;
+                    },
+                    empty: `
+                        <div class="no-results">
+                            <p>검색 결과가 없습니다.</p>
+                            <p>다른 검색어를 시도해보세요.</p>
+                        </div>
+                    `,
+                },
+            }),
+            
+            instantsearch.widgets.pagination({
+                container: '#pagination',
+                cssClasses: {
+                    list: 'pagination',
+                    item: 'page-item',
+                    link: 'page-link',
+                }
+            }),
+        ]);
+
+        search.start();
     </script>
 </body>
 </html>
