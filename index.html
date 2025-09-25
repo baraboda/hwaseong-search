@@ -120,26 +120,18 @@
                 container: '#hits',
                 templates: {
                     item(hit) {
-                        // 데이터 필드 안전하게 가져오기
-                        const cardNumber = hit.카드번호 || hit['카드번호'] || '-';
-                        const category = hit.분류 || hit['분류'] || '-';
-                        const region = hit.지역 || hit['지역'] || '-';
-                        const title = hit.현안제목 || hit['현안제목'] || '-';
-                        const problem = hit.문제점 || hit['문제점'] || '-';
-                        const suggestion = hit.제안내용 || hit['제안내용'] || '-';
-                        const department = hit.담당부서 || hit['담당부서'] || '-';
-                        
                         return `
                             <div class="card-header">
-                                <span class="card-number">${cardNumber}</span>
-                                <span class="card-category">${category}</span>
+                                <span class="card-number">${hit.카드번호 || '-'}</span>
+                                <span class="card-category">${hit.분류 || '-'}</span>
                             </div>
                             <div class="card-content">
-                                <p><span class="label">지역:</span> ${region}</p>
-                                <p><span class="label">현안제목:</span> ${title}</p>
-                                <p><span class="label">문제점:</span> ${problem}</p>
-                                <p><span class="label">제안내용:</span> ${suggestion}</p>
-                                <p><span class="label">담당부서:</span> ${department}</p>
+                                <p><span class="label">지역:</span> ${hit.지역 || '-'}</p>
+                                <p><span class="label">현안제목:</span> <strong>${hit.현안제목 || '-'}</strong></p>
+                                <p><span class="label">문제점:</span> ${hit.문제점 || '-'}</p>
+                                <p><span class="label">제안내용:</span> ${hit.제안내용 || '-'}</p>
+                                <p><span class="label">답변사항:</span> ${hit.답변사항 || '-'}</p>
+                                <p><span class="label">객관적분석:</span> ${hit['객관적 분석'] || hit.객관적분석 || '-'}</p>
                             </div>
                         `;
                     },
