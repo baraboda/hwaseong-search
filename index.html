@@ -194,7 +194,7 @@
         }
         
         .card-title {
-            font-size: 1.3em;
+            font-size: calc(var(--text-size) * 1.3);
             font-weight: 700;
             margin: 0;
             line-height: 1.3;
@@ -223,7 +223,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.95em;
+            font-size: calc(var(--text-size) * 0.95);
         }
         
         .section-label::before {
@@ -238,13 +238,14 @@
             color: #444;
             line-height: 1.7;
             padding-left: 12px;
+            font-size: var(--text-size);
         }
         
         /* 문제점 강조 */
         .problem-section {
             background: #fef2f2;
             border-left: 4px solid var(--danger-color);
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
             margin-bottom: 20px;
         }
@@ -257,7 +258,7 @@
         .suggestion-section {
             background: #f0f9ff;
             border-left: 4px solid var(--primary-color);
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
             margin-bottom: 20px;
         }
@@ -292,7 +293,7 @@
             color: white;
         }
         
-        /* 반응형 */
+        /* 반응형 - 모바일 */
         @media (max-width: 768px) {
             .ais-Hits-list {
                 grid-template-columns: 1fr;
@@ -305,6 +306,31 @@
             .header-content {
                 flex-direction: column;
                 gap: 20px;
+            }
+            
+            /* 모바일에서 카드 패딩 대폭 축소 */
+            .card-body {
+                padding: 15px;
+            }
+            
+            .card-header {
+                padding: 15px 18px;
+            }
+            
+            /* 섹션 내용 좌측 패딩 제거 */
+            .section-content {
+                padding-left: 0;
+            }
+            
+            /* 문제점/제안 섹션 패딩 축소 */
+            .problem-section,
+            .suggestion-section {
+                padding: 10px;
+            }
+            
+            .card-section {
+                margin-bottom: 15px;
+                padding-bottom: 15px;
             }
         }
         
@@ -347,14 +373,26 @@
     </div>
 
     <script>
-        // 폰트 크기 조절
+        // 폰트 크기 조절 - 더 세밀한 조절
         let currentSize = 16;
         function changeFontSize(delta) {
             currentSize += delta;
             if (currentSize < 12) currentSize = 12;
-            if (currentSize > 24) currentSize = 24;
+            if (currentSize > 26) currentSize = 26;
             document.documentElement.style.setProperty('--text-size', currentSize + 'px');
+            
+            // 변경 사항을 로컬 스토리지에 저장
+            localStorage.setItem('fontSize', currentSize);
         }
+
+        // 페이지 로드시 저장된 폰트 크기 적용
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedSize = localStorage.getItem('fontSize');
+            if (savedSize) {
+                currentSize = parseInt(savedSize);
+                document.documentElement.style.setProperty('--text-size', currentSize + 'px');
+            }
+        });
         
         // Algolia 설정
         const searchClient = algoliasearch(
