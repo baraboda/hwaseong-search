@@ -346,7 +346,6 @@
             animation: shimmer 2s infinite;
         }
     </style>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
     <div class="header">
@@ -486,14 +485,5 @@
 
         search.start();
     </script>
-    <script>
-if (window.netlifyIdentity) {
-  window.netlifyIdentity.on("init", user => {
-    if (!user) {
-      window.location.href = "/login.html";
-    }
-  });
-}
-</script>
 </body>
 </html>
