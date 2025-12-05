@@ -528,15 +528,28 @@
         async function readWithClova(text) {
             console.log('CLOVA TTS 호출:', clovaSpeaker);
             
-            // 텍스트 전처리
+            // 강화된 텍스트 전처리
             let processedText = text
+                // 하이픈을 쉼표로 변경 (마이너스로 읽지 않도록)
+                .replace(/\s-\s/g, ', ')  // " - " → ", "
+                .replace(/([가-힣])\s*-\s*/g, '$1, ')  // "김상균 -" → "김상균, "
+                .replace(/\s*-\s*([가-힣])/g, ', $1')  // "- 피아노" → ", 피아노"
+                
+                // 기존 전처리
                 .replace(/([가-힣a-zA-Z0-9])([🚨💡📢📊])/g, '$1. $2')
                 .replace(/([가-힣])([A-Z])/g, '$1. $2')
                 .replace(/문제점입니다/g, '문제점입니다.')
                 .replace(/제안내용입니다/g, '제안내용입니다.')
                 .replace(/답변사항입니다/g, '답변사항입니다.')
                 .replace(/객관적 분석입니다/g, '객관적 분석입니다.')
-                .replace(/([.!?])([^\s])/g, '$1 $2');
+                .replace(/([.!?])([^\s])/g, '$1 $2')
+                
+                // 추가: 콜론도 쉼표로
+                .replace(/:/g, ',')
+                
+                // 연속된 쉼표 정리
+                .replace(/,\s*,/g, ',')
+                .replace(/\.\s*,/g, '.');
             
             try {
                 const response = await fetch('/.netlify/functions/clova-tts', {
